@@ -21,8 +21,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import asyncio
 from org.acmsl.iac.licdata.domain import LicdataIac
-from org.acmsl.iac.licdata.infrastructure.cli import PulumiOptionsCli
 from org.acmsl.iac.licdata.infrastructure.azure import PulumiAzureStackFactory
+from org.acmsl.iac.licdata.infrastructure.cli import PulumiOptionsCli
+from org.acmsl.iac.licdata.infrastructure.dbus import LicdataIacDbusSignalEmitter
 import pulumi
 import pulumi_azure_native as azure_native
 from pythoneda.shared import Event
@@ -33,9 +34,10 @@ from typing import Dict
 
 
 # @enable(AzureServerlessLicense)
-@enable(ArtifactDbusSignalListener)
-@enable(LicdataIac)
 @enable(PulumiOptionsCli)
+@enable(ArtifactDbusSignalListener)
+@enable(LicdataIacDbusSignalEmitter)
+# @enable(LicdataIac)
 @enable(PulumiAzureStackFactory)
 class LicdataIacApp(PythonEDA):
     """
