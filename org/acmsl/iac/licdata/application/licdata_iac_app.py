@@ -25,6 +25,7 @@ from org.acmsl.iac.licdata.infrastructure.cli import PulumiOptionsCli
 from org.acmsl.iac.licdata.infrastructure.azure import PulumiAzureStackFactory
 import pulumi
 import pulumi_azure_native as azure_native
+from pythoneda.shared import Event
 from pythoneda.shared.application import enable, PythonEDA
 from pythoneda.shared.iac.events import InfrastructureUpdateRequested
 from pythoneda.shared.artifact.infrastructure.dbus import ArtifactDbusSignalListener
@@ -33,6 +34,7 @@ from typing import Dict
 
 # @enable(AzureServerlessLicense)
 @enable(ArtifactDbusSignalListener)
+@enable(LicdataIac)
 @enable(PulumiOptionsCli)
 @enable(PulumiAzureStackFactory)
 class LicdataIacApp(PythonEDA):
@@ -70,16 +72,19 @@ class LicdataIacApp(PythonEDA):
         Annotates the Pulumi options.
         :param options: Such options.
         :type options: Dict
+        :return: A list of events.
+        :rtype: List[pythoneda.shared.Event]
         """
-        updated = await LicdataIac.listen_InfrastructureUpdateRequested(
+        events = await LicdataIac.listen_InfrastructureUpdateRequested(
             InfrastructureUpdateRequested(
                 options.get("stackName", None),
                 options.get("projectName", None),
                 options.get("location", None),
             )
         )
-        if updated:
-            await self.emit(updated)
+
+        for event in events:
+            await self.emit(event)
 
 
 if __name__ == "__main__":
