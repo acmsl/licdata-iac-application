@@ -31,7 +31,10 @@ import pulumi
 import pulumi_azure_native as azure_native
 from pythoneda.shared import Event
 from pythoneda.shared.application import enable, PythonEDA
-from pythoneda.shared.iac.events import InfrastructureUpdateRequested
+from pythoneda.shared.iac.events import (
+    InfrastructureRemovalRequested,
+    InfrastructureUpdateRequested,
+)
 
 # from pythoneda.shared.artifact.infrastructure.dbus import ArtifactDbusSignalListener
 from typing import Dict
@@ -82,13 +85,23 @@ class LicdataIacApp(PythonEDA):
         :return: A list of events.
         :rtype: List[pythoneda.shared.Event]
         """
-        events = await LicdataIac.listen_InfrastructureUpdateRequested(
-            InfrastructureUpdateRequested(
-                options.get("stackName", None),
-                options.get("projectName", None),
-                options.get("location", None),
+        operation = options.get("operation", "up")
+        if operation == "up":
+            events = await LicdataIac.listen_InfrastructureUpdateRequested(
+                InfrastructureUpdateRequested(
+                    options.get("stackName", None),
+                    options.get("projectName", None),
+                    options.get("location", None),
+                )
             )
-        )
+        else:
+            events = await LicdataIac.listen_InfrastructureRemovalRequested(
+                InfrastructureRemovalRequested(
+                    options.get("stackName", None),
+                    options.get("projectName", None),
+                    options.get("location", None),
+                )
+            )
 
         for event in events:
             await self.emit(event)

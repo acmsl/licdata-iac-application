@@ -3,4 +3,5 @@ venv/*
 .serverless/
 notes.org
 serverless.yml
-run.*
+run.py
+*.sh
