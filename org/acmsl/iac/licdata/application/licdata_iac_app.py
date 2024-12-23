@@ -20,6 +20,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import asyncio
+from dbus_next import BusType
 from org.acmsl.iac.licdata.domain import LicdataIac
 from org.acmsl.iac.licdata.infrastructure.azure import PulumiAzureStackFactory
 from org.acmsl.iac.licdata.infrastructure.cli import PulumiOptionsCli
@@ -27,25 +28,50 @@ from org.acmsl.iac.licdata.infrastructure.dbus import (
     LicdataIacDbusSignalEmitter,
     LicdataIacDbusSignalListener,
 )
-import pulumi
-import pulumi_azure_native as azure_native
-from pythoneda.shared import Event
 from pythoneda.shared.application import enable, PythonEDA
+from pythoneda.shared.artifact.events.infrastructure.dbus import (
+    DbusDockerImagePushed,
+    DbusDockerImageRequested,
+)
 from pythoneda.shared.iac.events import (
     InfrastructureRemovalRequested,
     InfrastructureUpdateRequested,
 )
-
-# from pythoneda.shared.artifact.infrastructure.dbus import ArtifactDbusSignalListener
+from pythoneda.shared.iac.events.infrastructure.dbus import (
+    DbusInfrastructureRemovalFailed,
+    DbusInfrastructureRemovalRequested,
+    DbusInfrastructureRemoved,
+    DbusInfrastructureUpdated,
+    DbusInfrastructureUpdateFailed,
+    DbusInfrastructureUpdateRequested,
+)
+from pythoneda.shared.runtime.secrets.events.infrastructure.dbus import (
+    DbusCredentialIssued,
+)
 from typing import Dict
 
 
 # @enable(AzureServerlessLicense)
-# @enable(IacDbusSignalEmitter)
 @enable(PulumiOptionsCli)
-@enable(LicdataIacDbusSignalEmitter)
-@enable(LicdataIacDbusSignalListener)
-# @enable(LicdataIac)
+@enable(
+    LicdataIacDbusSignalEmitter,
+    events=[
+        {"event-class": DbusCredentialIssued, "bus-type": BusType.SYSTEM},
+        {"event-class": DbusDockerImageRequested, "bus-type": BusType.SYSTEM},
+        {"event-class": DbusInfrastructureRemovalFailed, "bus-type": BusType.SYSTEM},
+        {"event-class": DbusInfrastructureRemoved, "bus-type": BusType.SYSTEM},
+        {"event-class": DbusInfrastructureUpdated, "bus-type": BusType.SYSTEM},
+        {"event-class": DbusInfrastructureUpdateFailed, "bus-type": BusType.SYSTEM},
+    ],
+)
+@enable(
+    LicdataIacDbusSignalListener,
+    events=[
+        {"event-class": DbusDockerImagePushed, "bus-type": BusType.SYSTEM},
+        {"event-class": DbusInfrastructureUpdateRequested, "bus-type": BusType.SYSTEM},
+        {"event-class": DbusInfrastructureRemovalRequested, "bus-type": BusType.SYSTEM},
+    ],
+)
 @enable(PulumiAzureStackFactory)
 class LicdataIacApp(PythonEDA):
     """
