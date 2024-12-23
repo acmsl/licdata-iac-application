@@ -5,3 +5,4 @@ notes.org
 serverless.yml
 run.py
 *.sh
+*.test
