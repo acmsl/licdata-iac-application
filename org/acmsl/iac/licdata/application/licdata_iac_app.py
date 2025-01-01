@@ -112,20 +112,26 @@ class LicdataIacApp(PythonEDA):
         :rtype: List[pythoneda.shared.Event]
         """
         operation = options.get("operation", "up")
+        metadata = {}
+        for key, value in options.items():
+            if key not in ["stack_name", "project_name", "location", "operation"]:
+                metadata[key] = value
         if operation == "up":
             events = await LicdataIac.listen_InfrastructureUpdateRequested(
                 InfrastructureUpdateRequested(
-                    options.get("stackName", None),
-                    options.get("projectName", None),
+                    options.get("stack_name", None),
+                    options.get("project_name", None),
                     options.get("location", None),
+                    metadata,
                 )
             )
         else:
             events = await LicdataIac.listen_InfrastructureRemovalRequested(
                 InfrastructureRemovalRequested(
-                    options.get("stackName", None),
-                    options.get("projectName", None),
+                    options.get("stack_name", None),
+                    options.get("project_name", None),
                     options.get("location", None),
+                    metadata,
                 )
             )
 
